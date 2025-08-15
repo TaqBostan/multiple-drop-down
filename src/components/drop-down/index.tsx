@@ -12,16 +12,6 @@ function MultiDropDown(props: MultiDropDownProps) {
   const [inputVal, setInputVal] = useState('');
   const [items, setItems] = useState<Item[]>([]);
 
-  const toggleTray = (open?: boolean) => {
-    let arrow = boxRef.current!.querySelector('span')! as HTMLElement;
-    let input = boxRef.current!.querySelector('input')! as HTMLInputElement;
-    if (open === undefined) open = arrow.getAttribute('data-open') !== 'true';
-    trayRef.current!.style.display = open ? 'block' : 'none';
-    arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(-90deg)';
-    arrow.setAttribute('data-open', open ? 'true' : 'false');
-    if (open) input.focus();
-  }
-
   useEffect(() => {
     if (props.items) {
       setItems(props.items.map(origin => {
@@ -42,7 +32,17 @@ function MultiDropDown(props: MultiDropDownProps) {
     }
   }, [props.items]);
 
-  const getLabelStr = () =>
+  const toggleTray = (open?: boolean) => {
+    let arrow = boxRef.current!.querySelector('span')! as HTMLElement;
+    let input = boxRef.current!.querySelector('input')! as HTMLInputElement;
+    if (open === undefined) open = arrow.getAttribute('data-open') !== 'true';
+    trayRef.current!.style.display = open ? 'block' : 'none';
+    arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(-90deg)';
+    arrow.setAttribute('data-open', open ? 'true' : 'false');
+    if (open) input.focus();
+  }
+
+  const getSelectedString = () =>
     items
       .filter(c => c.selected)
       .map(c => props.getItemLabel(c.origin))
@@ -62,17 +62,23 @@ function MultiDropDown(props: MultiDropDownProps) {
     setItems([...items]);
   }
 
-  const boxClick = (e: React.MouseEvent<HTMLDivElement>, open?: boolean) => {
-    toggleTray(open);
+  const boxClick = (e: React.MouseEvent<HTMLDivElement>, openTray?: boolean) => {
+    toggleTray(openTray);
     e.preventDefault();
     e.stopPropagation();
   }
 
   return (
     <>
-      <div ref={boxRef} style={{ width: props.style?.width ?? '100%' }} className='multi-dropdown__box' onClick={e => boxClick(e)}>
-        <label>{getLabelStr()}
-          <input placeholder='Add new one'
+      <div
+        ref={boxRef}
+        className='multi-dropdown__box'
+        style={{ width: props.style?.width ?? '100%' }}
+        onClick={e => boxClick(e)}>
+        <label>
+          {getSelectedString()}
+          <input
+            placeholder='Add new one'
             name='multi-dropdown__input'
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
@@ -80,7 +86,10 @@ function MultiDropDown(props: MultiDropDownProps) {
         </label>
         <span data-open="false">‹</span>
       </div>
-      <div ref={trayRef} className='multi-dropdown__tray' onClick={e => boxClick(e, true)}>
+      <div
+        ref={trayRef}
+        className='multi-dropdown__tray'
+        onClick={e => boxClick(e, true)}>
         <ul style={{ listStyleType: 'none', padding: '8px' }}>
           {items.map((item, index) =>
             <li
