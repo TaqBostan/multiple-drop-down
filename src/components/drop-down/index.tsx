@@ -50,7 +50,9 @@ function MultiDropDown(props: MultiDropDownProps) {
 
   const inputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      let origin = props.addItem(e.currentTarget.value);
+      let value = e.currentTarget.value;
+      if (value.trim() === '') return;
+      let origin = props.addItem(value);
       items.push({ origin, selected: true });
       setItems([...items]);
       setInputVal('');
